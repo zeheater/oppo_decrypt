@@ -186,7 +186,8 @@ def main():
     else:
         #print(data.decode('utf-8'))
         xml=data[:data.rfind(b">")+1].decode('utf-8')
-
+    #print(xml)
+    #exit(0)
     if "/" in filename:
         path = filename[:filename.rfind("/")]
     elif "\\" in filename:
@@ -219,29 +220,27 @@ def main():
                     start = int(item.attrib["SizeInSectorInSrc"]) * pagesize
                     length = int(item.attrib["SizeInByteInSrc"])
                     decryptfile(key,iv,filename, path, wfilename, start, length,length)
-        elif "Program" in child.tag:
-            # if not os.path.exists(os.path.join(path, child.tag)):
-            #    os.mkdir(os.path.join(path, child.tag))
-            # spath = os.path.join(path, child.tag)
+        elif child.tag in ["Data", "Data2"]:
             for item in child:
-                if "filename" in item.attrib:
-                    wfilename = item.attrib["filename"]
-                    if wfilename == "":
-                        continue
-                    start = int(item.attrib["FileOffsetInSrc"]) * pagesize
-                    length = int(item.attrib["SizeInSectorInSrc"]) * pagesize
-                    rlength = int(item.attrib["SizeInByteInSrc"])
-                    decryptfile(key,iv,filename, path, wfilename, start, length,rlength)
-                else:
-                    for subitem in item:
-                        if "filename" in subitem.attrib:
-                            wfilename = subitem.attrib["filename"]
-                            if wfilename == "":
-                                continue
-                            start = int(subitem.attrib["FileOffsetInSrc"]) * pagesize
-                            length = int(subitem.attrib["SizeInSectorInSrc"]) * pagesize
-                            rlength = int(item.attrib["SizeInByteInSrc"])
-                            decryptfile(key,iv,filename, path, wfilename, start, length,rlength)
+                if item.tag == 'program':
+                    if "filename" in item.attrib:
+                        wfilename = item.attrib["filename"]
+                        if wfilename == "":
+                            continue
+                        start = int(item.attrib["FileOffsetInSrc"]) * pagesize
+                        length = int(item.attrib["SizeInSectorInSrc"]) * pagesize
+                        rlength = int(item.attrib["SizeInByteInSrc"])
+                        decryptfile(key,iv,filename, path, wfilename, start, length,rlength)
+                    else:
+                        for subitem in item:
+                            if "filename" in subitem.attrib:
+                                wfilename = subitem.attrib["filename"]
+                                if wfilename == "":
+                                    continue
+                                start = int(subitem.attrib["FileOffsetInSrc"]) * pagesize
+                                length = int(subitem.attrib["SizeInSectorInSrc"]) * pagesize
+                                rlength = int(item.attrib["SizeInByteInSrc"])
+                                decryptfile(key,iv,filename, path, wfilename, start, length,rlength)
         # else:
         #    print (child.tag, child.attrib)
     print("Done. Extracted files to " + path)
